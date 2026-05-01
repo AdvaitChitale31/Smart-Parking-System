@@ -54,6 +54,18 @@ public:
         slots.push_back(ParkingSlot("C2", 3));
         slots.push_back(ParkingSlot("C3", 3));
     }
+void updateFile() {
+    ofstream file("data.txt");
+
+    for (auto &slot : slots) {
+        if (slot.isOccupied)
+            file << slot.slotID << " " << slot.vehicle->number << " Occupied\n";
+        else
+            file << slot.slotID << " Empty\n";
+    }
+
+    file.close();
+}
 
     // ================= SMART SLOT =================
     int calculateScore(ParkingSlot &slot, string type, bool isVIP) {
