@@ -41,33 +41,37 @@ private:
 
 public:
     ParkingSystem() {
-        // Create slots (Zone A = nearest)
+        // Zone A (nearest)
         slots.push_back(ParkingSlot("A1", 1));
         slots.push_back(ParkingSlot("A2", 1));
         slots.push_back(ParkingSlot("A3", 1));
 
+        // Zone B
         slots.push_back(ParkingSlot("B1", 2));
         slots.push_back(ParkingSlot("B2", 2));
         slots.push_back(ParkingSlot("B3", 2));
 
+        // Zone C (farthest)
         slots.push_back(ParkingSlot("C1", 3));
         slots.push_back(ParkingSlot("C2", 3));
         slots.push_back(ParkingSlot("C3", 3));
     }
-void updateFile() {
-    ofstream file("data.txt");
 
-    for (auto &slot : slots) {
-        if (slot.isOccupied)
-            file << slot.slotID << " " << slot.vehicle->number << " Occupied\n";
-        else
-            file << slot.slotID << " Empty\n";
+    // ================= UPDATE FILE (WEB SYNC) =================
+    void updateFile() {
+        ofstream file("data.txt");
+
+        for (auto &slot : slots) {
+            if (slot.isOccupied)
+                file << slot.slotID << " " << slot.vehicle->number << " Occupied\n";
+            else
+                file << slot.slotID << " Empty\n";
+        }
+
+        file.close();
     }
 
-    file.close();
-}
-
-    // ================= SMART SLOT =================
+    // ================= SMART SCORE =================
     int calculateScore(ParkingSlot &slot, string type, bool isVIP) {
         int score = slot.distance;
 
@@ -80,6 +84,7 @@ void updateFile() {
         return score;
     }
 
+    // ================= BEST SLOT =================
     ParkingSlot* getBestSlot(string type, bool isVIP) {
         ParkingSlot* best = nullptr;
         int bestScore = 999;
@@ -126,6 +131,8 @@ void updateFile() {
         slot->vehicle = new Vehicle(num, type);
 
         cout << "✅ Smart Slot Assigned: " << slot->slotID << endl;
+
+        updateFile(); // 🔥 update web dashboard
     }
 
     // ================= REMOVE =================
@@ -139,14 +146,12 @@ void updateFile() {
 
                 time_t exitTime = time(0);
                 double duration = difftime(exitTime, slot.vehicle->entryTime) / 60;
-
-                double fee = duration * 2; // ₹2 per minute
+                double fee = duration * 2;
 
                 cout << "Vehicle Found at Slot: " << slot.slotID << endl;
                 cout << "Duration: " << duration << " minutes\n";
                 cout << "Fee: ₹" << fee << endl;
 
-                // Save to file
                 ofstream file("parking_log.txt", ios::app);
                 file << num << " " << slot.slotID << " " << fee << endl;
                 file.close();
@@ -156,6 +161,8 @@ void updateFile() {
                 slot.isOccupied = false;
 
                 cout << "Vehicle Removed ✅\n";
+
+                updateFile(); // 🔥 update web dashboard
                 return;
             }
         }
@@ -173,7 +180,6 @@ void updateFile() {
                 cout << "Occupied (" << slot.vehicle->number << ")";
             else
                 cout << "Free";
-
             cout << endl;
         }
     }
